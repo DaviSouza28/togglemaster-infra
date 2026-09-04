@@ -1,0 +1,97 @@
+# =========================================================
+# ToggleMaster - Tech Challenge FIAP - Fase 3
+# =========================================================
+
+# -------------------------
+# Terraform
+# -------------------------
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Arquivos temporarios / backups
+*.quebrado
+*.bak
+*.tmp
+
+# IMPORTANTE:
+# .terraform.lock.hcl NAO deve ser ignorado.
+# Ele deve ser versionado.
+
+# -------------------------
+# Secrets / Environment
+# -------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Kubernetes local credentials
+.kube/
+kubeconfig
+kubeconfig.*
+
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+coverage.xml
+.coverage
+htmlcov/
+
+# -------------------------
+# Go
+# -------------------------
+bin/
+*.test
+*.out
+coverage.out
+
+# -------------------------
+# IDE / Editor
+# -------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# -------------------------
+# OS
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# Logs
+# -------------------------
+*.log
+logs/
+
+# -------------------------
+# Microsservicos com Git proprio
+# -------------------------
+auth-service/
+flag-service/
+targeting-service/
+evaluation-service/
+analytics-service/

@@ -1,0 +1,134 @@
+services:
+
+  auth-db:
+    image: postgres:16-alpine
+    container_name: auth-db
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+      - ./auth-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  flag-db:
+    image: postgres:16-alpine
+    container_name: flag-db
+    environment:
+      POSTGRES_DB: flags_db
+      POSTGRES_USER: flag_user
+      POSTGRES_PASSWORD: flag_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - flag-db-data:/var/lib/postgresql/data
+      - ./flag-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flag_user -d flags_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  targeting-db:
+    image: postgres:16-alpine
+    container_name: targeting-db
+    environment:
+      POSTGRES_DB: targeting_db
+      POSTGRES_USER: targeting_user
+      POSTGRES_PASSWORD: targeting_password
+    ports:
+      - "5434:5432"
+    volumes:
+      - targeting-db-data:/var/lib/postgresql/data
+      - ./targeting-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U targeting_user -d targeting_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  auth-service:
+    image: auth-service:local
+    container_name: auth-service
+    environment:
+      DATABASE_URL: postgres://auth_user:auth_password@auth-db:5432/auth_db
+      PORT: 8001
+      MASTER_KEY: local-master-key
+    ports:
+      - "8001:8001"
+    depends_on:
+      auth-db:
+        condition: service_healthy
+
+  flag-service:
+    image: flag-service:local
+    container_name: flag-service
+    environment:
+      DATABASE_URL: postgres://flag_user:flag_password@flag-db:5432/flags_db
+      PORT: 8002
+      AUTH_SERVICE_URL: http://auth-service:8001
+    ports:
+      - "8002:8002"
+    depends_on:
+      flag-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+
+  targeting-service:
+    image: targeting-service:local
+    container_name: targeting-service
+    environment:
+      DATABASE_URL: postgres://targeting_user:targeting_password@targeting-db:5432/targeting_db
+      PORT: 8003
+      AUTH_SERVICE_URL: http://auth-service:8001
+    ports:
+      - "8003:8003"
+    depends_on:
+      targeting-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+
+  evaluation-service:
+    image: evaluation-service:local
+    container_name: evaluation-service
+    environment:
+      PORT: 8004
+      REDIS_URL: redis://redis:6379
+      FLAG_SERVICE_URL: http://flag-service:8002
+      TARGETING_SERVICE_URL: http://targeting-service:8003
+      SERVICE_API_KEY: "tm_key_41e9b9bbc71101da2d2fde4a08d90beb1c72fc191255fb94cfefc1178457c080"
+      AWS_REGION: us-east-1
+    ports:
+      - "8004:8004"
+    depends_on:
+      redis:
+        condition: service_healthy
+      flag-service:
+        condition: service_started
+      targeting-service:
+        condition: service_started
+
+volumes:
+  auth-db-data:
+  flag-db-data:
+  targeting-db-data:
