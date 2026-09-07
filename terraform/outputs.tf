@@ -47,3 +47,8 @@ output "analytics_table_name" {
   description = "Nome da tabela DynamoDB de Analytics"
   value       = module.data_services.dynamodb_table_name
 }
+
+output "github_actions_role_arn" {
+  description = "ARN da IAM Role usada pelos pipelines do GitHub Actions"
+  value       = module.iam.github_actions_role_arn
+}

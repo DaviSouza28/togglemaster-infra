@@ -22,3 +22,8 @@ output "db_init_workload_role_arn" {
   description = "ARN da IAM Role do Job de inicializacao dos bancos"
   value       = aws_iam_role.db_init_workload.arn
 }
+
+output "github_actions_role_arn" {
+  description = "ARN da IAM Role usada pelos pipelines do GitHub Actions"
+  value       = aws_iam_role.github_actions.arn
+}
